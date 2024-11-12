@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="{{ url_for('static', filename='css/output.css') }}" rel="stylesheet">
+    <title>Sender Interface</title>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-blue-500">
+    <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md text-center">
+        <h1 class="text-2xl font-bold mb-6">Sender Interface</h1>
+
+        <button onclick="generateKeys()" class="bg-blue-600 text-white py-2 px-4 rounded mb-4 hover:bg-blue-700">Generate Keys</button>
+        <button onclick="shareKey()" class="bg-green-600 text-white py-2 px-4 rounded mb-4 hover:bg-green-700">Share Public Key</button>
+
+        <textarea id="message" class="border rounded w-full p-2 mb-4" placeholder="Enter message"></textarea>
+        <button onclick="sendMessage()" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Send Encrypted Message</button>
+    </div>
+
+    <script>
+        function generateKeys() {
+            fetch('/generate_sender_keys', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => console.log("Public Key:", data.public_key));
+        }
+
+        function shareKey() {
+            const publicKey = "<sender_public_key>"; // Replace this with dynamic public key retrieval
+            fetch('/share_key', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ public_key: publicKey })
+            });
+        }
+
+        function sendMessage() {
+            const message = document.getElementById("message").value;
+            fetch('/send_message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+        }
+    </script>
+</body>
+</html>
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="{{ url_for('static', filename='css/output.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+    <title>Receiver Interface</title>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-blue-500">
+    <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md text-center">
+        <h1 class="text-2xl font-bold mb-6">Receiver Interface</h1>
+
+        <button onclick="viewEncryptedMessage()" class="bg-purple-600 text-white py-2 px-4 rounded mb-4 hover:bg-purple-700">View Encrypted Message</button>
+        <button onclick="decryptMessage()" class="bg-red-600 text-white py-2 px-4 rounded mb-4 hover:bg-red-700">Decrypt Message</button>
+
+        <div id="encryptedMessage" class="text-gray-700 mt-4"></div>
+        <div id="decryptedMessage" class="text-gray-700 mt-4"></div>
+    </div>
+
+    <script>
+        function viewEncryptedMessage() {
+            fetch('/receive_message')
+                .then(response => response.json())
+                .then(data => document.getElementById("encryptedMessage").innerText = "Encrypted Message: " + data.encrypted_message);
+        }
+
+        function decryptMessage() {
+            const encryptedMessage = document.getElementById("encryptedMessage").innerText.replace("Encrypted Message: ", "");
+            fetch('/decrypt_message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ encrypted_message: encryptedMessage })
+            })
+            .then(response => response.json())
+            .then(data => document.getElementById("decryptedMessage").innerText = "Decrypted Message: " + data.decrypted_message);
+        }
+    </script>
+</body>
+</html>

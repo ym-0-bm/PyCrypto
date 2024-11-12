@@ -1,0 +1,4 @@
+.expanded {
+    width: 40%; /* Largeur augmentée quand le conteneur est étendu */
+    transition: width 0.3s ease; /* Transition douce */
+}
